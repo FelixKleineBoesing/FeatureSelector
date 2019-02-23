@@ -9,6 +9,6 @@ setup(name='pyFeatSel',
       author='Felix Kleine Bösing',
       license='WDL',
       packages=find_packages(),
-      install_requires=['numpy'],
+      install_requires=['numpy', "pandas", "xgboost"],
       include_package_data=True,
       zip_safe=False)
