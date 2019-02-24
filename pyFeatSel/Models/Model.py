@@ -1,12 +1,14 @@
 import abc
 import pandas as pd
-import logging
 import xgboost as xgb
+import numpy as np
+import logging
+
 
 class Model(abc.ABC):
 
     @abc.abstractmethod
-    def train_model(self, train_data: pd.DataFrame, train_label: pd.DataFrame):
+    def train_model(self, train_data: pd.DataFrame, train_label: list):
         pass
 
     @abc.abstractmethod
@@ -29,15 +31,17 @@ class XGBoostModel(Model):
             self.params = {"eta": 0.3}
         else:
             self.params = xgb_params
+        self.params["silent"] = 1
         self.model = None
         self.n_rounds = n_rounds
 
-    def train_model(self, train_data: pd.DataFrame, train_label: pd.DataFrame):
+    def train_model(self, train_data: pd.DataFrame, train_label: np.ndarray):
+        assert type(train_data) == pd.DataFrame
+        assert type(train_label) == np.ndarray
         train_data = self._preprocess(train_data)
-        train_label = train_label.Survived.tolist()
-        dtrain = xgb.DMatrix(train_data, train_label)
+        dtrain = xgb.DMatrix(train_data, train_label, silent=True)
 
-        self.model = xgb.train(self.params, dtrain, num_boost_round=self.n_rounds)
+        self.model = xgb.train(self.params, dtrain, num_boost_round=self.n_rounds, verbose_eval=False)
 
     def predict(self, data: pd.DataFrame):
         data = self._preprocess(data)
