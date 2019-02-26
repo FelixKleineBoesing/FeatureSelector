@@ -6,6 +6,7 @@ import time
 from pyFeatSel.Models.Model import XGBoostModel
 from pyFeatSel.FeatureSelectors.CompleteFeatureSpace import CompleteFeatureSpace
 from pyFeatSel.FeatureSelectors.GreedySearch import GreedySearch
+from pyFeatSel.FeatureSelectors.SMACSearch import SMACSearch
 from pyFeatSel.Evaluator.Evaluator import Accuracy
 from pyFeatSel.misc.Helpers import threshold_base
 
@@ -45,13 +46,13 @@ class Tester:
                                                                                   comp_feat_selector.best_result[
                                                                                       "measure"]["val"]))
 
-    def run_greedy_search2(self):
+    def run_smac_search(self):
         start = time.time()
         logging.getLogger().setLevel(logging.INFO)
         train_data, train_label = self.read_files()
 
-        comp_feat_selector = GreedySearch(train_data=train_data, train_label=train_label, k_folds=10,
-                                          objective="classification")
+        comp_feat_selector = SMACSearch(train_data=train_data, train_label=train_label, k_folds=10,
+                                          objective="classification", maxtime=120)
         comp_feat_selector.run_selecting()
         logging.info(
             "Used time in seconds: {0}, got test (val) measure: {1} ({2})".format(str(int(time.time() - start)),
@@ -74,5 +75,5 @@ class Tester:
 if __name__=="__main__":
     tester = Tester()
     #tester.run_complete_feature_space()
-    tester.run_greedy_search()
-    tester.run_greedy_search2()
+    #tester.run_greedy_search()
+    tester.run_smac_search()

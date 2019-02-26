@@ -72,27 +72,33 @@ class FeatureSelector(abc.ABC):
         self.best_result = None
 
     def inner_run(self, column_names: list):
-        data = self.train_data[column_names]
-        label = self.train_label
-        subsets = create_k_fold_indices(label.__len__(), self.k_fold)
-        measure_test = []
-        measure_val = []
+        if len(column_names) > 0:
+            data = self.train_data[column_names]
+            label = self.train_label
+            subsets = create_k_fold_indices(label.__len__(), self.k_fold)
+            measure_test = []
+            measure_val = []
 
-        for subset in subsets:
-            dtrain, dtest, dval = data.iloc[subset["train"]], data.iloc[subset["test"]], data.iloc[subset["val"]]
-            ltrain, ltest, lval = label[subset["train"]], label[subset["test"]], label[subset["val"]]
-            self.model.train_model(dtrain, ltrain)
-            y_test = self.model.predict(dtest)
-            y_val = self.model.predict(dval)
-            if self.objective == "classification":
-                y_test = self.threshold_func(y_test)
-                y_val = self.threshold_func(y_val)
-            measure_test += [self.evaluator.evaluate(y_test, ltest)]
-            measure_val += [self.evaluator.evaluate(y_val, lval)]
-            mean_test = np.mean(measure_test)
-            mean_val = np.mean(measure_val)
+            for subset in subsets:
+                dtrain, dtest, dval = data.iloc[subset["train"]], data.iloc[subset["test"]], data.iloc[subset["val"]]
+                ltrain, ltest, lval = label[subset["train"]], label[subset["test"]], label[subset["val"]]
+                self.model.train_model(dtrain, ltrain)
+                y_test = self.model.predict(dtest)
+                y_val = self.model.predict(dval)
+                if self.objective == "classification":
+                    y_test = self.threshold_func(y_test)
+                    y_val = self.threshold_func(y_val)
+                measure_test += [self.evaluator.evaluate(y_test, ltest)]
+                measure_val += [self.evaluator.evaluate(y_val, lval)]
+                mean_test = np.mean(measure_test)
+                mean_val = np.mean(measure_val)
 
-        return {"test": mean_test, "val": mean_val}
+            return {"test": mean_test, "val": mean_val}
+        else:
+            if self.maximize_measure:
+                return {"test": 0.0000000001, "val": 0.0000000001}
+            else:
+                return {"test": 999999999999999, "val": 999999999999999}
 
     @abc.abstractmethod
     def run_selecting(self):
