@@ -31,13 +31,15 @@ class SMACSearch(FeatureSelector):
             self.maxtime = 60
         elif maxtime is not None:
             self.maxtime = maxtime
+            self.maxrun = None
         else:
             self.maxrun = maxrun
+            self.maxtime = None
         super().__init__(train_data, train_label, objective, k_folds, evaluator, model,
                          maximize_measure, threshold_func)
 
     def run_selecting(self):
-
+        # TODO coonfigpsace seems not to work
         column_names = self.train_data.columns.values.tolist()
 
         scenario_dict = {"run_obj": "quality",
@@ -50,8 +52,8 @@ class SMACSearch(FeatureSelector):
             scenario_dict["runcount_limit"] = self.maxrun
         cs = ConfigurationSpace()
         for column_name in column_names:
-            param = UniformIntegerHyperparameter(name = column_name, lower=0, upper=1,
-                                                 q=None, log=False, default_value=0)
+            param = UniformIntegerHyperparameter(name=column_name, lower=float(0), upper=float(1),
+                                                 q=None, log=False, default_value=float(1))
             cs.add_hyperparameter(param)
 
         scenario = Scenario(scenario_dict)
@@ -84,6 +86,6 @@ class SMACSearch(FeatureSelector):
             self.best_result = {"measure": measure, "column_names": column_names}
         if self.maximize_measure:
             # invert return value because smac is only able to minimize
-            return 1 / measure["test"]
+            return 1/measure["test"]
         else:
             return measure["test"]

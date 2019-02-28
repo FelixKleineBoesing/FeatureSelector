@@ -52,7 +52,7 @@ class Tester:
         train_data, train_label = self.read_files()
 
         comp_feat_selector = SMACSearch(train_data=train_data, train_label=train_label, k_folds=10,
-                                          objective="classification", maxtime=120)
+                                          objective="classification", maxrun=20)
         comp_feat_selector.run_selecting()
         logging.info(
             "Used time in seconds: {0}, got test (val) measure: {1} ({2})".format(str(int(time.time() - start)),
