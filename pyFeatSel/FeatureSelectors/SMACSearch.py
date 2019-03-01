@@ -8,11 +8,12 @@ from ConfigSpace.hyperparameters import CategoricalHyperparameter, \
     NumericalHyperparameter, IntegerHyperparameter, FloatHyperparameter, \
     NormalIntegerHyperparameter, NormalFloatHyperparameter, OrdinalHyperparameter, \
     Constant
-
+from smac.configspace import pcs, pcs_new
 from smac.facade.smac_facade import SMAC
 from smac.runhistory.runhistory import RunKey
 from smac.scenario.scenario import Scenario
 from smac.tae.execute_func import ExecuteTAFuncArray
+
 from pyFeatSel.Evaluator.Evaluator import EvaluatorBase, RMSE, Accuracy
 from pyFeatSel.Models.Model import Model
 from pyFeatSel.misc.Helpers import create_k_fold_indices, threshold_base
@@ -52,18 +53,17 @@ class SMACSearch(FeatureSelector):
             scenario_dict["runcount_limit"] = self.maxrun
         cs = ConfigurationSpace()
         for column_name in column_names:
-            param = UniformIntegerHyperparameter(name=column_name, lower=float(0), upper=float(1),
-                                                 q=None, log=False, default_value=float(1))
+            param = OrdinalHyperparameter(name=column_name, sequence=[0,1], default_value=float(1))
             cs.add_hyperparameter(param)
 
         scenario = Scenario(scenario_dict)
         scenario.cs = cs
 
-        ta = ExecuteTAFuncArray(ta=self.run_pipeline, use_pynisher=False)
+        ta = ExecuteTAFuncArray(ta=self.run_pipeline, use_pynisher=False, run_obj="quality")
 
-        smac = SMAC(scenario=scenario, tae_runner=ta, rng=1)
+        smac = SMAC(scenario=scenario, tae_runner=ta, rng=np.random.randint(1,30))
         #smac.logger = logging.getLogger(smac.__module__ + "." + smac.__class__.__name__)
-        incumbent, runhistory = smac.optimize()
+        incumbent = smac.optimize()
 
         config_id = smac.solver.runhistory.config_ids[incumbent]
         run_key = RunKey(config_id, None, 0)
