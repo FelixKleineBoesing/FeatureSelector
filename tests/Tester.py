@@ -71,8 +71,9 @@ class Tester:
         train_label = np.char.replace(np.array(train_label), "\n", "").astype(int)
         return train_data, train_label
 
+
 if __name__=="__main__":
     tester = Tester()
-    #tester.run_complete_feature_space()
+    tester.run_complete_feature_space()
     tester.run_greedy_search()
     tester.run_greedy_search2()
